@@ -1,4 +1,4 @@
-# Module 3 : Update Mysfits from Managed Service for Kafka Topics
+# Module 3 : Update Misfits from AWS Managed Service for Kafka Topics
 
 ![Architecture](/images/module-2/architecture-module-2.png)
 
@@ -53,7 +53,7 @@ The Kafka Client EC2 instance has all of necessary packages to connect to AWS MS
         chgrp -R ec2-user ./kafka
         chown -R ec2-user ./mm
         chgrp -R ec2-user ./mm
-		yum install aws-cli
+	yum install aws-cli
 ```
 
 Now that you have an SSH session started, you want to create a Topic to publish messages to. This will be the same topic that the Mystical Misfits Java application will subscribe to. In order to interact with the AWS MSK cluster, we need to know the [Zookpeer](https://zookeeper.apache.org/) endpoints. To retrieve information about the AWS MSK cluster, we can use the describe-cluster CLI command, which requires the ARN (Amazon Resource Name) of the AWS MSK resource. This value is part of the Output that you saved to the cloudformation-core-output.json file. Find the REPLACE_ME_MSK_CLUSTER_ARN description and copy the OutputValue associated. Replace the REPLACE_ME_MSK_CLUSTER_ARN token in the following command with the OutputValue. NOTE: The aws-cli was installed via the User Data launch commands.
