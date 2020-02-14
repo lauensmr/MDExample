@@ -1,4 +1,4 @@
-# Module 3 : Update Misfits from AWS Managed Service for Kafka Topics
+# Module 3 : Update Misfits from Kafka Topics
 
 ![Architecture](/images/module-2/architecture-module-2.png)
 
