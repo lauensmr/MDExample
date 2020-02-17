@@ -21,13 +21,21 @@ In Module 3 you will update the Java application to read any updates to differen
 
 AWS MSK provided the managed service benefits of running a complete Kafka environment. In addition to consuming changes from a topic, you will add messages to the Kafka topic with an [AWS EC2](https://aws.amazon.com/ec2/) instance acting as the Kafka producer.
 
+## Upload KeyPair PEM to Cloud9
+
+At the start of this Workshop you received an email. In that email, grab the link to the PEM file that will be used to SSH into your EC2Kafka Client instance. Run the following command in Cloud9 Terminal to copy the PEM file to your local instance:
+
+```
+aws s3 cp s3://INSERT-YOUR-MYMSKKEY-URL ~/environment/myMSKKey.pem
+```
+
 ## Create Kafka Topics
 
-In your [Amazon Cloud9](https://aws.amazon.com/cloud9/) IDE, ensure that you have a terminal window open. If you do not have one open, you can open a new one under Window -> New Terminal. In the terminal, copy the following commands to [set permissions](https://ss64.com/bash/chmod.html) on the PEM file and SSH into the [AWS EC2](https://aws.amazon.com/ec2/) instance. This instance will act as our Producer to our AWS MSK cluster.
+In your [Amazon Cloud9](https://aws.amazon.com/cloud9/) IDE, ensure that you have a terminal window open. If you do not have one open, you can open a new one under Window -> New Terminal. In the terminal, copy the following commands to [set permissions](https://ss64.com/bash/chmod.html) on the PEM file and SSH into the [AWS EC2](https://aws.amazon.com/ec2/) instance. This instance will act as our Producer to our AWS MSK cluster. The REPLACE_ME_KAFKA_CLIENT_DNS can be found in the cloudformation-core-output.json file.
 
 ```
 chmod 600 ~/environment/myMSKKey.pem
-ssh ec2-user@54.88.211.205 -i ~/environment/myMSKKey.pem
+ssh ec2-user@REPLACE_ME_KAFKA_CLIENT_DNS -i ~/environment/myMSKKey.pem
 ```
 
 The Kafka Client EC2 instance has all of necessary packages to connect to AWS MSK. These packages were installed as part of the [User Data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) in the CloudFormation Template. For reference, the following script was used in CloudFormation to provision all packages upon creation of the EC2 instance:
