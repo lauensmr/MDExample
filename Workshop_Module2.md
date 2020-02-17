@@ -141,11 +141,11 @@ As a result you will see docker reporting that your container is up and running 
 
 To test our service with a local request, we're going to open up the built-in web browser within the Cloud9 IDE that can be used to preview applications that are running on the IDE instance.  To open the preview web browser, select **Preview > Preview Running Application** in the Cloud9 menu bar:
 
-![preview-menu](/images/module-2/preview-menu.png)
+![preview-menu](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-2/preview-menu.png)
 
 This will open another panel in the IDE where the web browser will be available.  Append /mysfits to the end of the URI in the address bar of the preview browser and hit enter:
 
-![preview-menu](/images/module-2/address-bar.png)
+![preview-menu](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-2/address-bar.png)
 
 If successful you will see a response from the service that returns the JSON document stored at `/aws-modern-application-workshop/module-2/app/service/src/main/resources/json/mysfits-response.json`
 
