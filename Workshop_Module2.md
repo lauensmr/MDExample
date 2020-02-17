@@ -45,7 +45,7 @@ aws cloudformation create-stack --stack-name MSKAppMod --capabilities CAPABILITY
 You can check on the status of your stack creation either via the AWS Console or by running the command:
 
 ```
-aws cloudformation describe-stacks --stack-name MythicalMysfitsCoreStack
+aws cloudformation describe-stacks --stack-name MSKAppMod
 ```
 
 Run the the `describe-stacks` command, until you see a status of ```"StackStatus": "CREATE_COMPLETE"```
@@ -55,14 +55,14 @@ Run the the `describe-stacks` command, until you see a status of ```"StackStatus
 When you get this response, CloudFormation has finished provisioning all of the core networking and security resources described above and you can proceed. Wait for the above stack to show `CREATE_COMPLETE` before proceeding on. If you want a script to wait for this state you can use the [aws cloudformation wait](https://docs.aws.amazon.com/cli/latest/reference/cloudformation/wait/stack-create-complete.html) command:
 
 ```
-aws cloudformation wait stack-create-complete --stack-name MythicalMysfitsCoreStack && echo "stack created"
+aws cloudformation wait stack-create-complete --stack-name MSKAppMod && echo "stack created"
 ```
 
 **
 Save the names and ids of created resources by CloudFormation to use in the next steps of this workshop.  You can run the following command to directly output the above `describe-stacks` command to a new file in your IDE that will be stored as `cloudformation-core-output.json`:**
 
 ```
-aws cloudformation describe-stacks --stack-name MythicalMysfitsCoreStack > ~/environment/cloudformation-core-output.json
+aws cloudformation describe-stacks --stack-name MSKAppMod > ~/environment/cloudformation-core-output.json
 ```
 
 In this workshops architecture this core infrastructure resources are stable and shared across application deployments. 
@@ -235,7 +235,7 @@ When this command has successfully completed, a new file will be created in your
 
 ### Create a Load Balancer Target Group
 
-Next, use the CLI to create an NLB **target group**. A target group allows AWS resources to register themselves as targets for requests that the load balancer receives to forward.  Our service containers will automatically register to this target so that they can receive traffic from the NLB when they are provisioned. This command includes one value that will need to be replaced, your `vpc-id` which can be found as a value within the earlier saved `MythicalMysfitsCoreStack` output returned by CloudFormation.
+Next, use the CLI to create an NLB **target group**. A target group allows AWS resources to register themselves as targets for requests that the load balancer receives to forward.  Our service containers will automatically register to this target so that they can receive traffic from the NLB when they are provisioned. This command includes one value that will need to be replaced, your `vpc-id` which can be found as a value within the earlier saved `MSKAppMod` output returned by CloudFormation.
 
 ```
 aws elbv2 create-target-group --name MythicalMysfits-TargetGroup --port 8080 --protocol TCP --target-type ip --vpc-id REPLACE_ME_VPC_ID --health-check-interval-seconds 10 --health-check-path / --health-check-protocol HTTP --healthy-threshold-count 3 --unhealthy-threshold-count 3 > opn
@@ -328,7 +328,7 @@ First, we need to create another S3 bucket to store the temporary artifacts that
 aws s3 mb s3://REPLACE_ME_ARTIFACTS_BUCKET_NAME
 ```
 
-Similarly to the website bucket, this bucket needs a bucket policy to define access permissions. But unlike our website bucket that allowed access to anyone, only our CI/CD pipeline should have access to this bucket.  We have provided the JSON file needed for this policy at `~/environment/aws-modern-application-workshop/module-2/aws-cli/artifacts-bucket-policy.json`.  Open this file, and inside you will need to replace several strings to include the ARNs that were created as part of the MythicalMysfitsCoreStack earlier, as well as your newly chosen bucket name for your CI/CD artifacts.
+Similarly to the website bucket, this bucket needs a bucket policy to define access permissions. But unlike our website bucket that allowed access to anyone, only our CI/CD pipeline should have access to this bucket.  We have provided the JSON file needed for this policy at `~/environment/aws-modern-application-workshop/module-2/aws-cli/artifacts-bucket-policy.json`.  Open this file, and inside you will need to replace several strings to include the ARNs that were created as part of the MSKAppMod earlier, as well as your newly chosen bucket name for your CI/CD artifacts.
 
 Once you've modified and saved this file, execute the following command to grant access to this bucket to your CI/CD pipeline:
 
@@ -348,7 +348,7 @@ aws codecommit create-repository --repository-name MythicalMysfitsService-Reposi
 
 With a repository to store our code in, and an S3 bucket that will be used for our CI/CD artifacts, lets add to the CI/CD stack with a way for a service build to occur.  This will be accomplished by creating an [**AWS CodeBuild Project**](https://aws.amazon.com/codebuild/).  Any time a build execution is triggered, AWS CodeBuild will automatically provision a build server to our configuration and execute the steps required to build our docker image and push a new version of it to the ECR repository we created (and then spin the server down when the build is completed).  The steps for our build (which package our Java code and build/push the Docker container) are included in the `~/environment/aws-modern-application-workshop/module-2/app/buildspec.yml` file.  The **buildspec.yml** file is what you create to instruct CodeBuild what steps are required for a build execution within a CodeBuild project.
 
-To create the CodeBuild project, another CLI input file is required to be updated with parameters specific to your resources. It is located at `~/environment/aws-modern-application-workshop/module-2/aws-cli/code-build-project.json`.  Similarly replace the values within this file as you have done before from the MythicalMysfitsCoreStackOutput. Once saved, execute the following with the CLI to create the project:
+To create the CodeBuild project, another CLI input file is required to be updated with parameters specific to your resources. It is located at `~/environment/aws-modern-application-workshop/module-2/aws-cli/code-build-project.json`.  Similarly replace the values within this file as you have done before from the MSKAppModOutput. Once saved, execute the following with the CLI to create the project:
 
 ```
 aws codebuild create-project --cli-input-json file://~/environment/aws-modern-application-workshop/module-2/aws-cli/code-build-project.json
@@ -370,7 +370,7 @@ aws codepipeline create-pipeline --cli-input-json file://~/environment/aws-moder
 
 ### Enable Automated Access to ECR Image Repository
 
-We have one final step before our CI/CD pipeline can execute end-to-end successfully. With a CI/CD pipeline in place, you won't be manually pushing container images into ECR anymore.  CodeBuild will be pushing new images now. We need to give CodeBuild permission to perform actions on your image repository with an **ECR repository policy***.  The policy document needs to be updated with the specific ARN for the CodeBuild role created by the MythicalMysfitsCoreStack, and the policy document is located at `~/environment/aws-modern-application-workshop/module-2/aws-cli/ecr-policy.json`.  Update and save this file and then run the following command to create the policy:
+We have one final step before our CI/CD pipeline can execute end-to-end successfully. With a CI/CD pipeline in place, you won't be manually pushing container images into ECR anymore.  CodeBuild will be pushing new images now. We need to give CodeBuild permission to perform actions on your image repository with an **ECR repository policy***.  The policy document needs to be updated with the specific ARN for the CodeBuild role created by the MSKAppMod, and the policy document is located at `~/environment/aws-modern-application-workshop/module-2/aws-cli/ecr-policy.json`.  Update and save this file and then run the following command to create the policy:
 
 ```
 aws ecr set-repository-policy --repository-name mythicalmysfits/service --policy-text file://~/environment/aws-modern-application-workshop/module-2/aws-cli/ecr-policy.json
