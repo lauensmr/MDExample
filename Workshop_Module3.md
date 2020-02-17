@@ -31,11 +31,17 @@ aws s3 cp s3://INSERT-YOUR-MYMSKKEY-URL ~/environment/myMSKKey.pem
 
 ## Create Kafka Topics
 
-In your [Amazon Cloud9](https://aws.amazon.com/cloud9/) IDE, ensure that you have a terminal window open. If you do not have one open, you can open a new one under Window -> New Terminal. In the terminal, copy the following commands to [set permissions](https://ss64.com/bash/chmod.html) on the PEM file and SSH into the [AWS EC2](https://aws.amazon.com/ec2/) instance. This instance will act as our Producer to our AWS MSK cluster. The REPLACE_ME_KAFKA_CLIENT_DNS can be found in the cloudformation-core-output.json file.
+In your [Amazon Cloud9](https://aws.amazon.com/cloud9/) IDE, ensure that you have a terminal window open. If you do not have one open, you can open a new one under Window -> New Terminal. In the terminal, copy the following commands to [set permissions](https://ss64.com/bash/chmod.html) on the PEM file which will be used to SSH into the [AWS EC2](https://aws.amazon.com/ec2/) instance. 
 
 ```
 chmod 600 ~/environment/myMSKKey.pem
-ssh ec2-user@REPLACE_ME_KAFKA_CLIENT_DNS -i ~/environment/myMSKKey.pem
+```
+
+In addition, you will need to grab metadata from the AWS MSK Cluster. In order to interact with the AWS MSK cluster, we need to know the [Zookpeer](https://zookeeper.apache.org/) endpoints and the Bootstrap Brokers. To retrieve information about the AWS MSK cluster, we can use the describe-cluster CLI command, which requires the ARN (Amazon Resource Name) of the AWS MSK resource. This value is part of the Output that you saved to the cloudformation-core-output.json file. Find the REPLACE_ME_MSK_CLUSTER_ARN description and copy the OutputValue associated. Replace the REPLACE_ME_MSK_CLUSTER_ARN token in the following command with the OutputValue. 
+
+```
+aws kafka describe-cluster --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > ~/environment/msk-info.json
+aws kafka get-bootstrap-brokers --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > ~/environment/msk-brokers-info.json
 ```
 
 The Kafka Client EC2 instance has all of necessary packages to connect to AWS MSK. These packages were installed as part of the [User Data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) in the CloudFormation Template. For reference, the following script was used in CloudFormation to provision all packages upon creation of the EC2 instance:
@@ -65,14 +71,13 @@ The Kafka Client EC2 instance has all of necessary packages to connect to AWS MS
 	yum install aws-cli
 ```
 
-Now that you have an SSH session started, you want to create a Topic to publish messages to. This will be the same topic that the Mystical Misfits Java application will subscribe to. In order to interact with the AWS MSK cluster, we need to know the [Zookpeer](https://zookeeper.apache.org/) endpoints. To retrieve information about the AWS MSK cluster, we can use the describe-cluster CLI command, which requires the ARN (Amazon Resource Name) of the AWS MSK resource. This value is part of the Output that you saved to the cloudformation-core-output.json file. Find the REPLACE_ME_MSK_CLUSTER_ARN description and copy the OutputValue associated. Replace the REPLACE_ME_MSK_CLUSTER_ARN token in the following command with the OutputValue. NOTE: The aws-cli was installed via the User Data launch commands.
+This EC2 instance will act as our Producer to our AWS MSK cluster. Use the following command to initiate an SSH session. The REPLACE_ME_KAFKA_CLIENT_DNS can be found in the cloudformation-core-output.json file.
 
 ```
-aws kafka describe-cluster --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > ~/environment/msk-info.json
-aws kafka get-bootstrap-brokers --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > ~/environment/msk-brokers-info.json
+ssh ec2-user@REPLACE_ME_KAFKA_CLIENT_DNS -i ~/environment/myMSKKey.pem
 ```
 
-Open the newly created msk-info.json file. In this file, you will find the metadata for the AWS MSK cluster. Copy the value from the key value "ZookeeperConnectString". The value will look similar to "z-3.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181,z-2.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181,z-1.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181". Paste this value into the following command to create a new topic in Kafka:
+Now that you have an SSH session started, you want to create a Topic to publish messages to. This will be the same topic that the Mystical Misfits Java application will subscribe to. Open the newly created msk-info.json file. In this file, you will find the metadata for the AWS MSK cluster. Copy the value from the key value "ZookeeperConnectString". The value will look similar to "z-3.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181,z-2.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181,z-1.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181". Paste this value into the following command to create a new topic in Kafka:
 
 ```
 ./kafka/kafka_2.12-2.2.1/bin/kafka-topics.sh --create --zookeeper "REPLACE_ME_ZOOKEEPER_CONNECT_STRING" --replication-factor 2 --partitions 1 --topic misfitupdate
@@ -84,20 +89,20 @@ With the topic created successfully with the following respone:
 Created topic misfitupdate.
 ```
 
-Great! Now you will need some messages on the topic that can be read into the application. To get the Bootstrap server (or brokers) you can open the mskBrokerInfo.json file that we produced earlier.
+Great! Now you will need some messages on the topic that can be read into the application. To get the Bootstrap Brokers you can open the mskBrokerInfo.json file that we produced earlier.
 
 ```
-./kafka-console-producer.sh --broker-list REPLACE-ME-BOOTSTRAP-SERVERS --topic misfitupdate
+./kafka-console-producer.sh --broker-list REPLACE-ME-BOOTSTRAP-BROKERS --topic misfitupdate
 ```
 
 With the command run, you will be left with an open session for write messages to the topic (symbol > is shown). Type in the following messages at the prompt:
 
 ```
-"mysfitId":"4e53920c-505a-4a90-a694-b9300791f0ae","name":"Ben","age":"43"
-"mysfitId": "2b473002-36f8-4b87-954e-9a377e0ccbec","name": "Cory","species": "Cargillian"
+{"mysfitId":"4e53920c-505a-4a90-a694-b9300791f0ae","name":"Ben","age":"43"}
+{"mysfitId": "2b473002-36f8-4b87-954e-9a377e0ccbec","name": "Cory","species": "Cargillian"}
 ```
 
-Press Ctrl+C to exit from the Producer script.
+You now have two messages published to the misfitupdate topic in your AWS MSK cluster. From here, the topic messages can be consumed by any application or process set to subscribe to this topic. Each consumer may be part of a consumer-group that controls what messages have been read and processed. In the next part of the lab, we will simply read the entire list of messages on the topic and display them in a list in our Java application. Press Ctrl+C to exit from the Producer script.
 
 We are ready to make changes to the Java application.
 
