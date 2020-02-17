@@ -1,6 +1,6 @@
 # Module 1: IDE Setup and Static Website Hosting
 
-![Architecture](/images/module-1/architecture-module-1.png)
+![Architecture](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/architecture-module-1.png)
 
 **Time to complete:** 20 minutes
 
@@ -27,27 +27,27 @@ Select a region from the dropdown in the upper right corner of the AWS Managemen
 ### Create a new AWS Cloud9 Environment
 
  On the AWS Console home page, type **Cloud9** into the service search bar and select it:
- ![aws-console-home](/images/module-1/cloud9-service.png)
+ ![aws-console-home](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/cloud9-service.png)
 
 
 Click **Create Environment** on the Cloud9 home page:
-![cloud9-home](/images/module-1/cloud9-home.png)
+![cloud9-home](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/cloud9-home.png)
 
 
 Name your environment **MythicalMysfitsIDE** with any description you'd like, and click **Next Step**:
-![cloud9-name](/images/module-1/cloud9-name-ide.png)
+![cloud9-name](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/cloud9-name-ide.png)
 
 
 Leave the Environment settings as their defaults and click **Next Step**:
-![cloud9-configure](/images/module-1/cloud9-configure-env.png)
+![cloud9-configure](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/cloud9-configure-env.png)
 
 
 Click **Create Environment**:
-![cloud9-review](/images/module-1/cloud9-review.png)
+![cloud9-review](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/cloud9-review.png)
 
 
 When the IDE has finished being created for you, you'll be presented with a welcome screen that looks like this:
-![cloud9-welcome](/images/module-1/cloud9-welcome.png)
+![cloud9-welcome](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/cloud9-welcome.png)
 
 ### Cloning the Mythical Mysfits Workshop Repository
 
@@ -116,11 +116,11 @@ The JSON document for the necessary bucket policy is located at: `~/environment/
 
 To **open a file** in Cloud9, use the File Explorer on the left panel and double click `website-bucket-policy.json`:
 
-![bucket-policy-image.png](/images/module-1/bucket-policy-image.png)
+![bucket-policy-image.png](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/bucket-policy-image.png)
 
 This will open `bucket-policy.json` in the File Editor panel.  Replace the string shown with your chosen bucket name used in the previous commands:
 
-![replace-bucket-name.png](/images/module-1/replace-bucket-name.png)
+![replace-bucket-name.png](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/replace-bucket-name.png)
 
 **! Before you do that !**
 
@@ -185,7 +185,7 @@ HTTP/1.1 200 OK
 Now, open up your favorite web browser and enter one of the below URIs into the address bar.  One of the below URIs contains a '.' before the region name, and the other a '-'. Which you should use depends on the region you're using.
 
 
-![mysfits-welcome](/images/module-1/mysfits-welcome.png)
+![mysfits-welcome](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-1/mysfits-welcome.png)
 
 Congratulations, you have created the basic static Mythical Mysfits Website!
 
