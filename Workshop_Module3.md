@@ -5,7 +5,10 @@
 **Services used:**
 * [AWS MSK](https://aws.amazon.com/msk/)
 * [AWS EC2](https://aws.amazon.com/ec2/)
-* [Amazon Virtual Private Cloud (VPC)](https://aws.amazon.com/vpc/)
+* [Amazon Elastic Load Balancing](https://aws.amazon.com/elasticloadbalancing/)
+* [Amazon Elastic Container Service (ECS)](https://aws.amazon.com/ecs/)
+* [AWS Fargate](https://aws.amazon.com/fargate/)
+* [AWS Elastic Container Registry (ECR)](https://aws.amazon.com/ecr/)
 * [Amazon Cloud9](https://aws.amazon.com/cloud9/)
 * [AWS CodeCommit](https://aws.amazon.com/codecommit/)
 * [AWS CodePipeline](https://aws.amazon.com/codepipeline/)
