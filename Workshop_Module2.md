@@ -38,7 +38,8 @@ To create these resources, run the following command in the Cloud9 terminal (wil
 
 ```
 aws s3 cp s3://lauenstein-workdir/cft.yml ~/environment/core.yml 
-aws cloudformation create-stack --stack-name MythicalMysfitsCoreStack --capabilities CAPABILITY_NAMED_IAM --template-body file://~/environment/core.yml   
+
+aws cloudformation create-stack --stack-name MSKAppMod --capabilities CAPABILITY_NAMED_IAM --template-body file://~/environment/core.yml --parameters ParameterKey=KeyName,ParameterValue=myMSKKey ParameterKey=SSHLocation,ParameterValue=0.0.0.0/0
 ```
 
 You can check on the status of your stack creation either via the AWS Console or by running the command:
