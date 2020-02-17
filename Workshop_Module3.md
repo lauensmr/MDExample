@@ -1,7 +1,5 @@
 # Module 3 : Update Misfits from Kafka Topics
 
-![Architecture](/images/module-2/architecture-module-2.png)
-
 **Time to complete:** 45 minutes
 
 **Services used:**
@@ -59,7 +57,8 @@ The Kafka Client EC2 instance has all of necessary packages to connect to AWS MS
 Now that you have an SSH session started, you want to create a Topic to publish messages to. This will be the same topic that the Mystical Misfits Java application will subscribe to. In order to interact with the AWS MSK cluster, we need to know the [Zookpeer](https://zookeeper.apache.org/) endpoints. To retrieve information about the AWS MSK cluster, we can use the describe-cluster CLI command, which requires the ARN (Amazon Resource Name) of the AWS MSK resource. This value is part of the Output that you saved to the cloudformation-core-output.json file. Find the REPLACE_ME_MSK_CLUSTER_ARN description and copy the OutputValue associated. Replace the REPLACE_ME_MSK_CLUSTER_ARN token in the following command with the OutputValue. NOTE: The aws-cli was installed via the User Data launch commands.
 
 ```
-aws kafka describe-cluster --region us-east-1 --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > msk-info.json
+aws kafka describe-cluster --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > msk-info.json
+aws kafka get-bootstrap-brokers --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > msk-brokers-info.json
 ```
 
 Open the newly created msk-info.json file. In this file, you will find the metadata for the AWS MSK cluster. Copy the value from the key value "ZookeeperConnectString". The value will look similar to "z-3.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181,z-2.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181,z-1.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181". Paste this value into the following command to create a new topic in Kafka:
@@ -74,16 +73,168 @@ With the topic created successfully with the following respone:
 Created topic misfitupdate.
 ```
 
+Great! Now you will need some messages on the topic that can be read into the application. To get the Bootstrap server (or brokers) you can open the mskBrokerInfo.json file that we produced earlier.
+
+```
+./kafka-console-producer.sh --broker-list REPLACE-ME-BOOTSTRAP-SERVERS --topic misfitupdate
+```
+
+With the command run, you will be left with an open session for write messages to the topic (symbol > is shown). Type in the following messages at the prompt:
+
+```
+"mysfitId":"4e53920c-505a-4a90-a694-b9300791f0ae","name":"Ben","age":"43"
+"mysfitId": "2b473002-36f8-4b87-954e-9a377e0ccbec","name": "Cory","species": "Cargillian"
+```
+
+Press Ctrl+C to exit from the Producer script.
+
 We are ready to make changes to the Java application.
 
 ## Update the Java Source Code
 
 With the application already integrated with [AWS CodePipeline](https://aws.amazon.com/codepipeline/), we can make modifications to the application and have them continuously deployed to your [AWS Fargate](https://aws.amazon.com/fargate/) cluster. 
 
-In your [Amazon Cloud9](https://aws.amazon.com/cloud9/) IDE, open the file ....... update the code file to read the follow.
+In your [Amazon Cloud9](https://aws.amazon.com/cloud9/) IDE, open the file /MythicalMysfitsService-Repository/service/src/main/java/com/example/MythicalMysfitsController.java to update the code file. Copy the entire code segment and overwrite the files contents. Note to replace the REPLACE_ME values with the appropriate values. 
 
 ```
-for (int i = 0; ... more java code)
+package com.example;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Service;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import java.util.UUID;
+import java.util.Arrays;
+import java.util.Properties;
+
+@RestController
+public class MythicalMysfitsController {
+
+    @Autowired
+    private MythicalMysfitsService mythicalMysfitsService = new MythicalMysfitsService();
+
+    @RequestMapping(value="/mysfits", method=RequestMethod.GET)
+    public Mysfits getMysfits(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        return mythicalMysfitsService.getAllMysfits();
+    }
+
+    @RequestMapping(value="/", method=RequestMethod.GET)
+    public String healthCheckResponse() {
+        return "Nothing here, used for health check. Try /mysfits instead.";
+    }
+    
+    @RequestMapping(value="/kafka", method=RequestMethod.GET)
+    public String kafkaCheck(HttpServletResponse response) {
+        ConsumerRecords<String, String> recs;
+        String retStr = "KAFKA values:<br />";
+        
+        try {
+            Properties props = new Properties();
+            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "REPLACE_ME_BOOTSTRAP_SERVERS");
+            props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+            props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+            props.put(ConsumerConfig.GROUP_ID_CONFIG, "misfit-consumer-group");
+            props.put("auto.offset.reset", "earliest");
+            props.put("enable.auto.commit", "false");
+            
+			System.out.printf("Initializing KAFKA CONSUMER");
+			KafkaConsumer consumer = new KafkaConsumer(props);
+			Thread.sleep(200);
+			consumer.subscribe(Arrays.asList("misfitupdate"));
+            
+            recs = consumer.poll(10000);
+            System.out.printf("Done polling Kafka topic...");
+            if (recs.count() == 0) {
+                retStr += "NO RECORDS<br />";
+            } else {
+                for (ConsumerRecord<String, String> rec : recs) {
+                    retStr += "Recieved " + rec.key() + " " + rec.value() + "<br />";
+                }
+            }
+
+            consumer.close();
+        }
+        catch (Exception e) {
+            System.out.println("Kafka failure: " + e.getMessage());
+        }
+        
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Cache-Control", "no-store");
+        return retStr;
+    }
+}
+```
+
+You need to inject two other dependencies in this SpringBoot Java application to ensure that it will connect to your AWS MSK cluster. Copy the code snippet below and overwrite the content of the /MythicalMysfitsService-Repository/service/pom.xml. This will ensure that the Kafka dependencies are brought into the application during the Maven build process:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>mythical-mysfits</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.0.4.RELEASE</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.12</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <java.version>1.8</java.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
 ```
 
 Once complete with the code changes, we need to commit our changes to Git. This will deploy our changes to our Fargate instance. Run the following commands:
@@ -94,11 +245,15 @@ git commit -m "I am going to consume topics from AWS MSK."
 git push
 ```
 
-As stated in Module 2, the change is pushed into the repository, you can open the CodePipeline service in the AWS Console to view your changes as they progress through the CI/CD pipeline. After committing your code change, it will take about 5 to 10 minutes for the changes to be deployed to your live service running in Fargate.  During this time, AWS CodePipeline will orchestrate triggering a pipeline execution when the changes have been checked into your CodeCommit repository, trigger your CodeBuild project to initiate a new build, and retrieve the docker image that was pushed to ECR by CodeBuild and perform an automated ECS [Update Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/update-service.html) action to connection drain the existing containers that are running in your service and replace them with the newly built image.  Refresh your Mythical Mysfits website in the browser to see that the changes have taken effect.
+As stated in Module 2, the change is pushed into the repository, you can open the CodePipeline service in the AWS Console to view your changes as they progress through the CI/CD pipeline. After committing your code change, it will take about 5 to 10 minutes for the changes to be deployed to your live service running in Fargate.  During this time, AWS CodePipeline will orchestrate triggering a pipeline execution when the changes have been checked into your CodeCommit repository, trigger your CodeBuild project to initiate a new build, and retrieve the docker image that was pushed to ECR by CodeBuild and perform an automated ECS [Update Service](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/update-service.html) action to connection drain the existing containers that are running in your service and replace them with the newly built image.  
 
-You can view the progress of your code change through the CodePipeline console here (no actions needed, just watch the automation in action!):
-[AWS CodePipeline](https://console.aws.amazon.com/codepipeline/home)
+You can view the progress of your code change through the CodePipeline console here (no actions needed, just watch the automation in action!): [AWS CodePipeline](https://console.aws.amazon.com/codepipeline/home)
 
+Open your Mysfits webpage to view the new Kafka RequestMappings contents:
 
+#Replace with your NLB DNS name
+http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/kafka
+
+Next step... integrate the updated messages with the Angular web app!
 
 
