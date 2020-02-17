@@ -316,7 +316,7 @@ http://REPLACE_ME_BUCKET_NAME.s3-website-REPLACE_ME_YOUR_REGION.amazonaws.com"
 
 ## Automating Deployments using AWS Code Services
 
-![Architecture](/images/module-2/architecture-module-2b.png)
+![Architecture](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-2/architecture-module-2b.png)
 
 ### Create a S3 Bucket for Pipeline Artifacts
 
@@ -444,7 +444,7 @@ You can view the progress of your code change through the CodePipeline console h
 
 This concludes Module 2.
 
-[Proceed to Module 3](/module-3)
+[Proceed to Module 3](https://github.com/lauensmr/MDExample/blob/master/Workshop_Module3.md)
 
 
 ## [AWS Developer Center](https://developer.aws)
