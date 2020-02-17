@@ -297,11 +297,11 @@ Next, we need to integrate our website with your new API backend instead of usin
 
 Open the file in Cloud9 and replace the highlighted area below between the quotes with the NLB URL:
 
-![before replace](/images/module-2/before-replace.png)
+![before replace](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-2/before-replace.png)
 
 After pasting, the line should look similar to below:
 
-![after replace](/images/module-2/after-replace.png)
+![after replace](https://github.com/aws-samples/aws-modern-application-workshop/raw/java/images/module-2/after-replace.png)
 
 ### Upload to S3
 To upload this file to your S3 hosted website, use the bucket name again that was created during Module 1, and run the following command:
