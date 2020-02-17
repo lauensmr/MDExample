@@ -279,7 +279,7 @@ After your service is created, ECS will provision a new task that's running the 
 
 ### Test the Service
 
-Copy the DNS name you saved when creating the NLB and send a request to it using the preview browser in Cloud9 (or by simply any web browser, since this time our service is available on the Internet). Try sending a request to the mysfits resource:
+It can take up to 5 minutes for the application to become available. Copy the DNS name you saved when creating the NLB and send a request to it using the preview browser in Cloud9 (or by simply any web browser, since this time our service is available on the Internet). Try sending a request to the mysfits resource:
 
 ```
 #Replace with your NLB DNS name
