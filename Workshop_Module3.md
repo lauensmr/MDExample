@@ -1,6 +1,6 @@
 # Module 3 : Update Misfits from Kafka Topics
 
-**Time to complete:** 45 minutes
+**Time to complete:** 30 minutes
 
 **Services used:**
 * [AWS MSK](https://aws.amazon.com/msk/)
