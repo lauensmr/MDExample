@@ -191,7 +191,7 @@ Congratulations, you have created the basic static Mythical Mysfits Website!
 
 That concludes Module 1.
 
-[Proceed to Module 2](/module-2)
+[Proceed to Module 2](https://github.com/lauensmr/MDExample/blob/master/Workshop_Module2.md)
 
 
 ## [AWS Developer Center](https://developer.aws)
