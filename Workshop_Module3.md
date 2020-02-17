@@ -116,7 +116,7 @@ We are ready to make changes to the Java application.
 
 With the application already integrated with [AWS CodePipeline](https://aws.amazon.com/codepipeline/), we can make modifications to the application and have them continuously deployed to your [AWS Fargate](https://aws.amazon.com/fargate/) cluster. 
 
-In your [Amazon Cloud9](https://aws.amazon.com/cloud9/) IDE, open the file /MythicalMysfitsService-Repository/service/src/main/java/com/example/MythicalMysfitsController.java to update the code file. Copy the entire code segment and overwrite the files contents. Note to replace the REPLACE_ME values with the appropriate values. 
+In your [Amazon Cloud9](https://aws.amazon.com/cloud9/) IDE, open the file /MythicalMysfitsService-Repository/service/src/main/java/com/example/MythicalMysfitsController.java to update the code file. Copy the entire code segment and overwrite the files contents. Note to replace the REPLACE_ME_BOOTSTRAP_BROKERS value with the non-Tls Bootstrap value that you used earlier. 
 
 ```
 package com.example;
@@ -160,7 +160,7 @@ public class MythicalMysfitsController {
         
         try {
             Properties props = new Properties();
-            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "REPLACE_ME_BOOTSTRAP_SERVERS");
+            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "REPLACE_ME_BOOTSTRAP_BROKERS");
             props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
             props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
             props.put(ConsumerConfig.GROUP_ID_CONFIG, "misfit-consumer-group");
@@ -195,7 +195,7 @@ public class MythicalMysfitsController {
 }
 ```
 
-You need to inject two other dependencies in this SpringBoot Java application to ensure that it will connect to your AWS MSK cluster. Copy the code snippet below and overwrite the content of the /MythicalMysfitsService-Repository/service/pom.xml. This will ensure that the Kafka dependencies are brought into the application during the Maven build process:
+You need to inject three other dependencies in this SpringBoot Java application to ensure that it will connect to your AWS MSK cluster. Copy the code snippet below and overwrite the content of the /MythicalMysfitsService-Repository/service/pom.xml. This will ensure that the Kafka dependencies are brought into the application during the Maven build process:
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>
@@ -259,7 +259,7 @@ You need to inject two other dependencies in this SpringBoot Java application to
 </project>
 ```
 
-Once complete with the code changes, we need to commit our changes to Git. This will deploy our changes to our Fargate instance. Run the following commands:
+Once complete with the code changes, Save the file(s). You will need to commit the changes to AWS CodeCommit. This will deploy your changes to your Fargate environment. Run the following commands:
 
 ```
 git add .
@@ -276,6 +276,13 @@ Open your Mysfits webpage to view the new Kafka RequestMappings contents:
 #Replace with your NLB DNS name
 http://mysfits-nlb-123456789-abc123456.elb.us-east-1.amazonaws.com/kafka
 
-Next step... integrate the updated messages with the Angular web app!
+You can see the two messages you Produced earlier. To validate the subscription, SSH back into the EC2 instance and publish a couple more messages. After publishing, refresh your page. You will see the messages continue to build up. This is due to the Kafka Consumer properties being set to reset the iterator for every re-connected first poll:
+
+```
+props.put("auto.offset.reset", "earliest");
+props.put("enable.auto.commit", "false");
+```
+
+This concludes Module 3. Next step... integrate the updated messages into the Angular web app!
 
 
