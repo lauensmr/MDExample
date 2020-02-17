@@ -68,8 +68,8 @@ The Kafka Client EC2 instance has all of necessary packages to connect to AWS MS
 Now that you have an SSH session started, you want to create a Topic to publish messages to. This will be the same topic that the Mystical Misfits Java application will subscribe to. In order to interact with the AWS MSK cluster, we need to know the [Zookpeer](https://zookeeper.apache.org/) endpoints. To retrieve information about the AWS MSK cluster, we can use the describe-cluster CLI command, which requires the ARN (Amazon Resource Name) of the AWS MSK resource. This value is part of the Output that you saved to the cloudformation-core-output.json file. Find the REPLACE_ME_MSK_CLUSTER_ARN description and copy the OutputValue associated. Replace the REPLACE_ME_MSK_CLUSTER_ARN token in the following command with the OutputValue. NOTE: The aws-cli was installed via the User Data launch commands.
 
 ```
-aws kafka describe-cluster --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > msk-info.json
-aws kafka get-bootstrap-brokers --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > msk-brokers-info.json
+aws kafka describe-cluster --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > ~/environment/msk-info.json
+aws kafka get-bootstrap-brokers --region REPLACE_ME_REGION --cluster-arn=REPLACE_ME_MSK_CLUSTER_ARN > ~/environment/msk-brokers-info.json
 ```
 
 Open the newly created msk-info.json file. In this file, you will find the metadata for the AWS MSK cluster. Copy the value from the key value "ZookeeperConnectString". The value will look similar to "z-3.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181,z-2.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181,z-1.mskcluster.123456.c5.kafka.us-east-1.amazonaws.com:2181". Paste this value into the following command to create a new topic in Kafka:
