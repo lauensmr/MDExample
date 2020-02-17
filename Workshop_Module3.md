@@ -89,20 +89,26 @@ With the topic created successfully with the following respone:
 Created topic misfitupdate.
 ```
 
-Great! Now you will need some messages on the topic that can be read into the application. To get the Bootstrap Brokers you can open the mskBrokerInfo.json file that we produced earlier.
+Great! Now you will need some messages on the topic that can be read into the application. To get the Bootstrap Brokers you can open the mskBrokerInfo.json file that we produced earlier. Be sure to use the BootstrapBrokerString value as we are not setting up TLS for this lab. Note the port differences between the 9092 PLAINTEXT port and 9094 TLS port.
 
 ```
-./kafka-console-producer.sh --broker-list REPLACE-ME-BOOTSTRAP-BROKERS --topic misfitupdate
+./kafka/kafka_2.12-2.2.1/bin/kafka-console-producer.sh --broker-list REPLACE-ME-BOOTSTRAP-BROKERS --topic misfitupdate
 ```
 
-With the command run, you will be left with an open session for write messages to the topic (symbol > is shown). Type in the following messages at the prompt:
+With the command run, you will be left with an open session for write messages to the topic (symbol > is shown). Individually copy and paste in the following messages at the ">" prompt:
 
 ```
 {"mysfitId":"4e53920c-505a-4a90-a694-b9300791f0ae","name":"Ben","age":"43"}
 {"mysfitId": "2b473002-36f8-4b87-954e-9a377e0ccbec","name": "Cory","species": "Cargillian"}
 ```
 
-You now have two messages published to the misfitupdate topic in your AWS MSK cluster. From here, the topic messages can be consumed by any application or process set to subscribe to this topic. Each consumer may be part of a consumer-group that controls what messages have been read and processed. In the next part of the lab, we will simply read the entire list of messages on the topic and display them in a list in our Java application. Press Ctrl+C to exit from the Producer script.
+You now have two messages published to the misfitupdate topic in your AWS MSK cluster. From here, the topic messages can be consumed by any authorized application or process set to subscribe to this topic. Each consumer may be part of a consumer-group that controls what messages have been read and where the iterator resides. In the next part of the lab, we will simply read the entire list of messages on the topic and display them in a list in our Java application. Press Ctrl+C to exit from the Producer script.
+
+Once back at the SSH command prompt type the following to exit the SSH session:
+
+```
+exit
+```
 
 We are ready to make changes to the Java application.
 
