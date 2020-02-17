@@ -283,6 +283,11 @@ props.put("auto.offset.reset", "earliest");
 props.put("enable.auto.commit", "false");
 ```
 
+For reference, you can also use the CloudWatch Log Groups feature to view logs from your containerized application. Click the link below and select the top Log Stream to view the Spring Boot app and Kafka Consumer configuration logs:
+
+[CloudWatch Log Group - mythicalmysfits-logs](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logStream:group=mythicalmysfits-logs)
+
 This concludes Module 3. Next step... integrate the updated messages into the Angular web app!
+
 
 
